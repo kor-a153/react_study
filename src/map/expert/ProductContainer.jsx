@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useActionState, useState } from 'react';
 import Product from './Product';
 
 const ProductContainer = () => {
@@ -40,21 +40,50 @@ const ProductContainer = () => {
       ]
    }
 
+  const [value, setValue] = useState("");
+  const [currentProduct, setCurrentProduct] = useState({})
+  const [products, setProducts] = useState([])
+  const [isEnd, setIsEnd] = useState(false)
+
+  const handleValueOnChange = (e) => {
+    setValue(e.target.value)
+  }
+  const handleValueOnkeyDown = (e) => {
+    if(e.key === 'Enter'){
+      const product = store.productList.find((product) => product.name === value)
+      setCurrentProduct(product)
+      if(product){
+        setProducts([...products, product])
+      }
+    }
+
+    if(value === "종료"){
+      setIsEnd(true)
+    }
+  }
+
+  const productList = products.map(({name, price}, i) => (
+    <Product key={i} name={name} price={price} />
+  ))
+  
+  const totalPrice = products.map(({price}) => price).reduce((acc, curr) => acc += curr, 0)
 
   return (
     <div>
          <h1>결과 출력:</h1>
-         <input type="text" placeholder='구매할 상품을 입력하세요'/>
-         <p>상품 가격: </p>
-
-      
+         <input 
+        type="text" placeholder='구매할 상품을 입력하세요'
+        onChange={handleValueOnChange}
+        onKeyDown={handleValueOnkeyDown}
+      />
+         <p>상품 가격: {currentProduct && currentProduct.price?.toLocaleString()}원</p>
       <div>
         <h2>총 판매 목록</h2>
         <ul>
-
+          {isEnd && productList}
         </ul>
       </div>
-      <h3>총 판매 가격: </h3>
+      <h3>총 판매 가격: {totalPrice && totalPrice.toLocaleString()}원</h3>
     </div>
   );
 };
