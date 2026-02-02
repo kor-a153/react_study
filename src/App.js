@@ -1,9 +1,9 @@
-import CheckboxContainer from "./map/expert/CheckboxContainer";
+import FoodContainer from "./ref/expert/FoodContainer.jsx";
 
 function App() {
   return (
     <>
-      <CheckboxContainer/>
+      <FoodContainer/>
     </>
   );
 }
