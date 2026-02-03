@@ -1,9 +1,9 @@
-import FoodContainer from "./ref/expert/FoodContainer.jsx";
+import AnimalsContainer from "./context/epxert/AnimalsContainer.jsx";
 
 function App() {
   return (
     <>
-      <FoodContainer/>
+    <AnimalsContainer/>
     </>
   );
 }
