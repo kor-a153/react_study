@@ -15,10 +15,8 @@ export const AnimalsProvider = ({children}) => {
       animals
     },
     actions: {
-      insert: (useState) => { //insert에 useState값들이 순차적으로 들어가면서 반복돌며 버튼을 생성하는 기능.
-        <button>{useState}</button>
-      }, 
-      remove: () => {}
+      insert: (animal) => {setAnimals(animals.concat(animal))},
+      remove: (i) => { setAnimals(animals.filter((_, idx) => i !== idx)) }
     }
   }
 
