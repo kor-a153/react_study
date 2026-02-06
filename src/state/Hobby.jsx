@@ -33,4 +33,9 @@ const Hobby = () => {
   );
 };
 
+<<<<<<< HEAD
 export default Hobby;
+=======
+export default Hobby;
+
+>>>>>>> 9335dc045838e56ed5ce81a55c38fc2cdda94b17

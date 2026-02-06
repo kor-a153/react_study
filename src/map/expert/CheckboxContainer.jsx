@@ -4,6 +4,10 @@ import React, { useState } from 'react';
 // 상용자가 체크박스를 해제하면 value도 화면에서 제거
 // 단 화면에 출력하는 결과는 li태그의 리스트로 출력한다. (문자열 사용X)
 // 완료 후 li태는 컴포넌트로 분리
+<<<<<<< HEAD
+=======
+
+>>>>>>> 9335dc045838e56ed5ce81a55c38fc2cdda94b17
 const CheckboxContainer = () => {
 
   const languages = ["C", "Java", "JS"]
@@ -18,7 +22,12 @@ const CheckboxContainer = () => {
       setSelectedLanguages(selectedLanguages.filter((language) => language !== value))
     }
   }
+<<<<<<< HEAD
   
+=======
+
+  console.log("selectedLanguages", selectedLanguages)
+>>>>>>> 9335dc045838e56ed5ce81a55c38fc2cdda94b17
   const selectedList = selectedLanguages.map((language, i) => (
     <strong key={i} style={{marginRight: "8px"}}>{language}</strong>
   ))

@@ -3,6 +3,7 @@ import Product from './Product';
 
 const ProductContainer = () => {
 // 사용자가 구매할 상품을 입력한다.
+<<<<<<< HEAD
 	// 입력한 상품이 스토어에 있다면, 상품이 판매 된다.
 	// 모든 상품을 판매 후 사용자가 "종료"라고 입력하면
 	// 판매된 총 가격을 출력한다.
@@ -38,6 +39,44 @@ const ProductContainer = () => {
 			},
 		]
 	}
+=======
+   // 입력한 상품이 스토어에 있다면, 상품이 판매 된다.
+   // 모든 상품을 판매 후 사용자가 "종료"라고 입력하면
+   // 판매된 총 가격을 출력한다.
+   // ex) 닌텐도
+   // ex) 키보드
+   // ex) 종료
+  // 판매 목록
+  // - 닌텐도: 700,000원
+  // - 키보드: 50,000원
+   // 결과: 750,000원
+
+  const store = {
+      income : 0,
+      productList : [
+         {
+            name : "닌텐도",
+            price: 700000
+         },
+         {
+            name : "키보드",
+            price: 50000
+         },
+         {
+            name : "마우스",
+            price: 30000
+         },
+         {
+            name : "스피커",
+            price: 75000
+         },
+         {
+            name : "마이크",
+            price: 150000
+         },
+      ]
+   }
+>>>>>>> 9335dc045838e56ed5ce81a55c38fc2cdda94b17
 
   const [value, setValue] = useState("");
   const [currentProduct, setCurrentProduct] = useState({})
@@ -47,7 +86,10 @@ const ProductContainer = () => {
   const handleValueOnChange = (e) => {
     setValue(e.target.value)
   }
+<<<<<<< HEAD
   
+=======
+>>>>>>> 9335dc045838e56ed5ce81a55c38fc2cdda94b17
   const handleValueOnkeyDown = (e) => {
     if(e.key === 'Enter'){
       const product = store.productList.find((product) => product.name === value)
@@ -70,13 +112,22 @@ const ProductContainer = () => {
 
   return (
     <div>
+<<<<<<< HEAD
 			<h1>결과 출력:</h1>
 			<input 
+=======
+         <h1>결과 출력:</h1>
+         <input 
+>>>>>>> 9335dc045838e56ed5ce81a55c38fc2cdda94b17
         type="text" placeholder='구매할 상품을 입력하세요'
         onChange={handleValueOnChange}
         onKeyDown={handleValueOnkeyDown}
       />
+<<<<<<< HEAD
 			<p>상품 가격: {currentProduct && currentProduct.price?.toLocaleString()}원</p>
+=======
+         <p>상품 가격: {currentProduct && currentProduct.price?.toLocaleString()}원</p>
+>>>>>>> 9335dc045838e56ed5ce81a55c38fc2cdda94b17
       <div>
         <h2>총 판매 목록</h2>
         <ul>

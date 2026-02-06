@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>FailLog · 오늘의 실패 복기 대시보드 (Crimson Theme)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+
+:root {
+  /* 4) 블랙 + 골드 */
+  --base-bg: #0A0A0A;
+  --base-elevated: #050505;
+  --card-bg: #111111;
+  --card-soft: #181818;
+
+  --primary: #D4AF37;      /* 골드 */
+  --accent: #B91C1C;       /* 딥 레드 포인트 */
+  --accent-soft: #facc15;
+
+  --border-soft: rgba(212, 175, 55, 0.8);
+  --border-neutral: rgba(82, 82, 82, 0.95);
+
+  --text-main: #FAFAFA;
+  --text-sub: #E5E5E5;
+  --text-muted: #A3A3A3;
+
+  --radius-lg: 18px;
+  --radius-xl: 26px;
+  --shadow-soft: 0 18px 42px rgba(0, 0, 0, 0.9);
+  --shadow-card: 0 12px 30px rgba(0, 0, 0, 1);
+}
+
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      background:
+        radial-gradient(circle at top left, #1f2933 0, transparent 55%),
+        radial-gradient(circle at top right, #111118 0, transparent 60%),
+        linear-gradient(180deg, #050509, #000);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding: 28px 14px 40px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .page {
+      width: 100%;
+      max-width: 1180px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    .shell {
+      background:
+        radial-gradient(circle at top left, rgba(217, 4, 41, 0.18), transparent 55%),
+        linear-gradient(145deg, #05050b, #050509);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border-neutral);
+      box-shadow: var(--shadow-soft);
+      padding: 20px 22px 18px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(55, 65, 81, 0.9);
+      margin-bottom: 14px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      background: radial-gradient(circle at 25% 15%, #ffe8e8 0, #ff4b4b 40%, #550000 75%, #000 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fef2f2;
+      font-weight: 800;
+      font-size: 18px;
+      box-shadow: 0 12px 26px rgba(0, 0, 0, 0.9);
+    }
+
+    .brand-text-main {
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .brand-text-sub {
+      font-size: 11px;
+      color: var(--text-sub);
+    }
+
+    .brand-text-sub span {
+      color: var(--primary);
+    }
+
+    .header-right {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .pill {
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 11px;
+      border: 1px solid rgba(75, 85, 99, 0.9);
+      color: var(--text-sub);
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(10, 10, 16, 0.98);
+    }
+
+    .pill-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: radial-gradient(circle, var(--primary) 0, #ff6b6b 50%, #ffe0e0 100%);
+      box-shadow: 0 0 12px rgba(248, 113, 113, 0.9);
+    }
+
+    .btn-outline {
+      border-radius: 999px;
+      padding: 6px 13px;
+      font-size: 11px;
+      border: 1px solid rgba(75, 85, 99, 0.9);
+      background: rgba(10, 10, 16, 0.98);
+      color: var(--text-main);
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      border-radius: 999px;
+      padding: 7px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid rgba(248, 113, 113, 0.9);
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--primary), #ff4b4b);
+      color: #fdf2f2;
+      box-shadow: 0 10px 26px rgba(248, 113, 113, 0.55);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-primary span.icon {
+      font-size: 14px;
+      transform: translateY(0.5px);
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.04);
+    }
+
+    .top-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.7fr) minmax(0, 1.2fr);
+      gap: 18px;
+    }
+
+    .hero {
+      background:
+        radial-gradient(circle at top left, rgba(217, 4, 41, 0.2), transparent 60%),
+        linear-gradient(145deg, #101018, #05050b);
+      border-radius: var(--radius-xl);
+      padding: 18px 18px 16px;
+      border: 1px solid rgba(75, 85, 99, 0.95);
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .hero-label {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.98);
+      color: var(--accent-soft);
+      border: 1px solid rgba(248, 113, 113, 0.9);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .hero-label small {
+      opacity: 0.9;
+      color: var(--text-sub);
+    }
+
+    .hero-title {
+      font-size: 22px;
+      line-height: 1.3;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .hero-title span {
+      color: var(--primary);
+    }
+
+    .hero-sub {
+      font-size: 12px;
+      color: var(--text-sub);
+      line-height: 1.6;
+    }
+
+    .hero-sub em {
+      font-style: normal;
+      color: var(--accent);
+    }
+
+    .hero-sub span {
+      color: var(--accent-soft);
+      font-weight: 500;
+    }
+
+    .hero-quote {
+      margin-top: 4px;
+      font-size: 11px;
+      color: var(--text-muted);
+      border-left: 2px solid rgba(75, 85, 99, 0.9);
+      padding-left: 8px;
+      line-height: 1.6;
+    }
+
+    .hero-quote span {
+      color: var(--primary);
+    }
+
+    .hero-metrics {
+      margin-top: 8px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      font-size: 11px;
+    }
+
+    .metric {
+      padding: 8px 9px;
+      border-radius: 12px;
+      background: radial-gradient(circle at top, rgba(24, 24, 35, 0.95), rgba(8, 8, 14, 0.98));
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .metric-label {
+      color: var(--text-sub);
+    }
+
+    .metric-value {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent-soft);
+    }
+
+    .metric-caption {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    .hero-nudge {
+      margin-top: 6px;
+      padding: 7px 9px;
+      border-radius: 12px;
+      background: rgba(11, 11, 18, 0.98);
+      border: 1px dashed rgba(248, 113, 113, 0.9);
+      font-size: 11px;
+      color: var(--text-sub);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hero-nudge strong {
+      color: var(--accent-soft);
+    }
+
+    .hero-nudge button {
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(248, 113, 113, 0.9);
+      background: rgba(8, 8, 14, 0.98);
+      color: var(--accent-soft);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .panel {
+      background: radial-gradient(circle at top, rgba(17, 24, 39, 0.96), #05050c);
+      border-radius: var(--radius-xl);
+      padding: 16px 16px 14px;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-title {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .panel-sub {
+      font-size: 11px;
+      color: var(--text-sub);
+    }
+
+    .tag {
+      font-size: 10px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(75, 85, 99, 0.9);
+      color: var(--accent-soft);
+      background: rgba(6, 6, 12, 0.98);
+      white-space: nowrap;
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 8px;
+      margin-top: 4px;
+      font-size: 11px;
+    }
+
+    .field-row-2 {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+      gap: 8px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 3px;
+      color: var(--text-sub);
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid rgba(75, 85, 99, 0.95);
+      background: rgba(10, 10, 18, 0.98);
+      padding: 7px 9px;
+      font-size: 11px;
+      color: var(--text-main);
+      outline: none;
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: rgba(148, 163, 184, 0.9);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 58px;
+      line-height: 1.5;
+    }
+
+    .helper {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .panel-footer {
+      margin-top: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .panel-meta {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    .panel-meta span {
+      color: var(--accent-soft);
+      font-weight: 500;
+    }
+
+    .log-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 4px;
+      font-size: 11px;
+    }
+
+    .log-item {
+      padding: 8px 8px 7px;
+      border-radius: 12px;
+      background: rgba(8, 8, 14, 0.98);
+      border: 1px solid rgba(55, 65, 81, 0.95);
+      display: grid;
+      grid-template-columns: minmax(0, 1.7fr) auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .log-main {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .log-title {
+      color: var(--text-main);
+      font-weight: 500;
+    }
+
+    .log-meta {
+      color: var(--text-sub);
+      font-size: 10px;
+    }
+
+    .badge-status {
+      font-size: 10px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(248, 113, 113, 0.7);
+      color: #fecaca;
+      background: rgba(127, 29, 29, 0.5);
+      white-space: nowrap;
+      margin-bottom: 4px;
+    }
+
+    .badge-pending {
+      border-color: rgba(59, 130, 246, 0.7);
+      color: #bfdbfe;
+      background: rgba(15, 23, 42, 0.9);
+    }
+
+    .btn-small {
+      font-size: 10px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(75, 85, 99, 0.9);
+      background: rgba(6, 6, 12, 0.98);
+      color: var(--text-main);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .mid-grid {
+      margin-top: 6px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(0, 1.2fr) minmax(0, 1.2fr);
+      gap: 14px;
+    }
+
+    .card-mid {
+      background: radial-gradient(circle at top, rgba(17, 24, 39, 0.96), #020207);
+      border-radius: var(--radius-lg);
+      padding: 12px 12px 11px;
+      border: 1px solid rgba(55, 65, 81, 0.95);
+      box-shadow: var(--shadow-card);
+      font-size: 11px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .card-mid-title {
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pill-soft {
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 10px;
+      border: 1px solid rgba(55, 65, 81, 0.95);
+      color: var(--accent-soft);
+      background: rgba(10, 10, 18, 0.98);
+    }
+
+    .pill-danger {
+      border-color: rgba(248, 113, 113, 0.9);
+      color: #fecaca;
+      background: rgba(127, 29, 29, 0.65);
+    }
+
+    .split-columns {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .split-box {
+      padding: 7px 8px;
+      border-radius: 10px;
+      background: rgba(10, 10, 18, 0.98);
+      border: 1px solid rgba(55, 65, 81, 0.9);
+    }
+
+    .split-label {
+      font-size: 10px;
+      color: var(--text-sub);
+      margin-bottom: 2px;
+    }
+
+    .split-value {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent-soft);
+    }
+
+    .assumption-list,
+    .pattern-list,
+    .notto-list {
+      margin-top: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .assumption-item,
+    .pattern-item,
+    .notto-item {
+      display: flex;
+      gap: 6px;
+      align-items: flex-start;
+      color: var(--text-sub);
+      line-height: 1.5;
+    }
+
+    .assumption-item strong,
+    .pattern-item strong,
+    .notto-item strong {
+      color: var(--text-main);
+    }
+
+    .dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 999px;
+      margin-top: 6px;
+      background: rgba(148, 163, 184, 0.9);
+    }
+
+    .tag-mini {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1px solid rgba(75, 85, 99, 0.9);
+      color: var(--text-sub);
+      background: rgba(10, 10, 18, 0.98);
+      white-space: nowrap;
+    }
+
+    .footer {
+      border-radius: var(--radius-xl);
+      padding: 10px 14px;
+      background: radial-gradient(circle at top left, #05050b, #000);
+      border: 1px solid rgba(55, 65, 81, 0.95);
+      font-size: 11px;
+      color: var(--text-sub);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 10px 32px rgba(0, 0, 0, 1);
+    }
+
+    .footer span:last-child {
+      color: var(--accent-soft);
+      font-weight: 500;
+    }
+
+    @media (max-width: 960px) {
+      .top-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .mid-grid {
+        grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.2fr);
+      }
+    }
+
+    @media (max-width: 720px) {
+      body {
+        padding: 20px 10px 28px;
+      }
+
+      .shell {
+        padding: 16px 14px 14px;
+      }
+
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .header-right {
+        align-self: flex-end;
+      }
+
+      .mid-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .hero-title {
+        font-size: 19px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="shell">
+      <header>
+        <div class="brand">
+          <div class="brand-icon">F</div>
+          <div>
+            <div class="brand-text-main">FailLog</div>
+            <div class="brand-text-sub">
+              성공을 위한 <span>“무엇을 할지”</span>가 아니라,  
+              <span>“무엇이 잘못되었는지”</span>를 기록하는 도구
+            </div>
+          </div>
+        </div>
+        <div class="header-right">
+          <div class="pill">
+            <span class="pill-dot"></span>
+            오늘 실패 로그 <b>3건</b> 수집됨
+          </div>
+          <button class="btn-outline">데모 계정 보기</button>
+          <button class="btn-primary">
+            <span class="icon">✍️</span>
+            새 실패 로그 남기기
+          </button>
+        </div>
+      </header>
+
+      <main class="top-grid">
+        <section class="hero">
+          <div class="hero-label">
+            <span>지능형 복기 도구 · FailLog</span>
+            <small>피로 쓴 각오를 데이터로 남깁니다.</small>
+          </div>
+          <h1 class="hero-title">
+            실패를 <span>버리지 않고</span><br />
+            다음 승부를 위한 <span>각오 로그</span>로 쌓는 서비스
+          </h1>
+          <p class="hero-sub">
+            To-do는 “무엇을 했는가”만 적지만, FailLog는
+            <em>“왜 그렇게 하기로 결정했는가”</em>를 함께 기록합니다.<br />
+            죄책감이 아닌, <span>가설·맥락·결과</span>를 연결해서 복기하는 의사결정 로그입니다.
+          </p>
+          <div class="hero-quote">
+            <div>“어제와 똑같이 살면서 다른 미래를 기대하는 것은 <span>정신병 초기증세</span>이다.” – 아인슈타인</div>
+            <div>하나의 실패가 쌓일 때마다, 다음 성공 확률이 평균 <span>17% 상승</span>한다는 연구들이 있습니다.</div>
+          </div>
+          <div class="hero-metrics">
+            <div class="metric">
+              <div class="metric-label">오늘 기록된 결정</div>
+              <div class="metric-value">7건</div>
+              <div class="metric-caption">그중 3건, 실패로 확정됨</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">되풀이된 실패 패턴</div>
+              <div class="metric-value">4개</div>
+              <div class="metric-caption">과몰입 → 번아웃 · 올-오어-낫싱 등</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">금지 수칙 빌드업</div>
+              <div class="metric-value">12개</div>
+              <div class="metric-caption">시험 전날 · 야식 · 야근 트리거 차단</div>
+            </div>
+          </div>
+          <div class="hero-nudge">
+            <span>
+              경보: 이전에도 <strong>비슷한 근거</strong>로 결정을 내렸다가 실패한 적이 있어요.<br />
+              같은 상황의 리포트를 먼저 확인해 볼까요?
+            </span>
+            <button>과거 실패 리포트 열기</button>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">새 의사결정 로그 입력</div>
+              <div class="panel-sub">할 일을 적는 게 아니라, <b>“결정을 내린 순간”</b>을 기록합니다.</div>
+            </div>
+            <span class="tag">① 결정 로그 · Input</span>
+          </div>
+
+          <div class="field-grid">
+            <div>
+              <label for="decision">오늘 기록할 중요한 결정</label>
+              <input id="decision" placeholder="예: 이번 시험은 기출 위주로만 보기로 함" />
+            </div>
+            <div class="field-row-2">
+              <div>
+                <label for="reason">이 결정을 내린 근거</label>
+                <textarea id="reason" placeholder="예: 시간이 부족하고, 작년 출제 경향이 기출 위주였기 때문이라고 판단"></textarea>
+              </div>
+              <div>
+                <label for="ignored">무시한 신호 / 불편한 느낌</label>
+                <textarea id="ignored" placeholder="예: 기본 개념이 부족하다는 느낌이 있었지만, 불안해서 그냥 덮어버림"></textarea>
+              </div>
+            </div>
+            <div class="field-row-2">
+              <div>
+                <label for="assumption">숨겨진 가설</label>
+                <input id="assumption" placeholder="예: 하루 10시간은 충분히 집중할 수 있을 것이라는 가정" />
+                <div class="helper">“이 선택이 통할 거라고 믿은 이유”를 한 줄로 적어둡니다.</div>
+              </div>
+              <div>
+                <label for="timeframe">결과 예상 시점 · 중요도</label>
+                <input id="timeframe" placeholder="예: 시험일까지 14일 · 인생 영향도 ★★★★☆" />
+                <div class="helper">Time-lag를 나중에 복기하기 위한 좌표입니다.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel-footer">
+            <div class="panel-meta">
+              오늘 남은 의사결정 로그 슬롯 <b>2/5</b> · 감정보다
+              <span>사실</span> 위주로 적어보세요.
+            </div>
+            <button class="btn-primary">
+              <span class="icon">➕</span>
+              의사결정 로그 저장
+            </button>
+          </div>
+        </section>
+      </main>
+
+      <section class="panel" style="margin-top:16px;">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">오늘의 의사결정 타임라인</div>
+            <div class="panel-sub">결정 시점 → 결과 시점까지의 <b>Time-lag</b>를 한눈에 봅니다.</div>
+          </div>
+        <span class="tag">타임라인 · 복기 세션</span>
+        </div>
+
+        <div class="log-list">
+          <article class="log-item">
+            <div class="log-main">
+              <div class="log-title">기출 위주 공부 전략으로 전환</div>
+              <div class="log-meta">결정 시점: 3월 2일 밤 · 결과: 3월 28일 모의고사 · 상태: 실패 확정</div>
+              <div class="log-meta">근거: “시간 부족” · 무시한 신호: “개념 허술함”</div>
+            </div>
+            <div>
+              <div class="badge-status">실패 · 복기 필요</div>
+              <button class="btn-small">사후 분석 세션 열기</button>
+            </div>
+          </article>
+
+          <article class="log-item">
+            <div class="log-main">
+              <div class="log-title">사업 피치덱 완성 전, 투자미팅 먼저 잡기</div>
+              <div class="log-meta">결정 시점: 2월 10일 · 결과: 3월 5일 피드백 · 상태: 학습 기회</div>
+              <div class="log-meta">근거: “빠른 피드백이 중요하다” · 무시한 신호: “핵심 지표 미정리”</div>
+            </div>
+            <div>
+              <div class="badge-status badge-pending">부분 성공 · 보완 필요</div>
+              <button class="btn-small">가설 검증 로그 보기</button>
+            </div>
+          </article>
+
+          <article class="log-item">
+            <div class="log-main">
+              <div class="log-title">야근으로 공부 시간 메꾸기</div>
+              <div class="log-meta">결정 시점: 3월 1일 · 결과: 3월 3일 번아웃 · 상태: 반복 패턴</div>
+              <div class="log-meta">근거: “이번 주만 버티면 된다” · 무시한 신호: 잦은 두통·집중력 저하</div>
+            </div>
+            <div>
+              <div class="badge-status">재발 경고 · 패턴 02</div>
+              <button class="btn-small">관련 Not-to-do 보기</button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="mid-grid">
+        <section class="card-mid">
+          <div class="card-mid-title">
+            <span>사후 분석 · 내부 vs 외부 요인</span>
+            <span class="pill-soft">② 사후 분석</span>
+          </div>
+          <div class="split-columns">
+            <div class="split-box">
+              <div class="split-label">내부 요인 비중</div>
+              <div class="split-value">72%</div>
+              <div class="split-label">의지, 가설 오류, 준비 부족</div>
+            </div>
+            <div class="split-box">
+              <div class="split-label">외부 요인 비중</div>
+              <div class="split-value">28%</div>
+              <div class="split-label">환경, 운, 변수 통제 불가</div>
+            </div>
+          </div>
+          <div class="assumption-list">
+            <div class="assumption-item">
+              <div class="dot"></div>
+              <div>
+                <strong>틀어진 가설 01.</strong> “하루 10시간 집중 가능”  
+                → 실제는 평균 3.5시간 집중, 나머지는 피로 누적.
+              </div>
+            </div>
+            <div class="assumption-item">
+              <div class="dot"></div>
+              <div>
+                <strong>틀어진 가설 02.</strong> “기출만 보면 점수가 오를 것”  
+                → 기본 개념 구멍이 커서, 새로운 유형에서 반복적으로 오답.
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card-mid">
+          <div class="card-mid-title">
+            <span>실패 패턴 계보도</span>
+            <span class="pill-soft">③ 패턴 분석</span>
+          </div>
+          <div class="pattern-list">
+            <div class="pattern-item">
+              <div class="dot"></div>
+              <div>
+                <strong>패턴 A · 초반 과몰입 → 번아웃</strong><br />
+                시작 3일 동안 과도한 목표 설정 → 수면 부족 → 1주일 내 전면 중단.
+              </div>
+            </div>
+            <div class="pattern-item">
+              <div class="dot"></div>
+              <div>
+                <strong>패턴 B · 근거 없는 낙관주의</strong><br />
+                “이번엔 다를 것”이라는 말만 반복, 실제 전략은 이전과 동일.
+              </div>
+            </div>
+            <div class="pattern-item">
+              <div class="dot"></div>
+              <div>
+                <strong>패턴 C · 죄책감 루프</strong><br />
+                실패를 “성격 문제”로만 해석 → 원인 분석 없이 자책만 누적.
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card-mid">
+          <div class="card-mid-title">
+            <span>금지 수칙 · Not-to-do 리스트</span>
+            <span class="pill-soft pill-danger">④ 금지 수칙</span>
+          </div>
+          <div class="notto-list">
+            <div class="notto-item">
+              <div class="dot"></div>
+              <div>
+                <strong>시험 전날 새로운 문제집 사지 않기</strong><br />
+                불안감 해소용 소비는, 실제 점수 향상에 거의 기여하지 않았습니다.
+              </div>
+            </div>
+            <div class="notto-item">
+              <div class="dot"></div>
+              <div>
+                <strong>잠을 줄여 공부 시간 확보하려 하지 않기</strong><br />
+                수면 부족 상태의 공부는, 3일 뒤 거의 기억에 남지 않았습니다.
+              </div>
+            </div>
+            <div class="notto-item">
+              <div class="dot"></div>
+              <div>
+                <strong>큰 결정은 ‘기분이 좋을 때’만 내리지 않기</strong><br />
+                기분 좋은 날의 투자·지출 결정에서 손실 비율이 더 높게 측정되었습니다.
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:6px; display:flex; gap:6px; flex-wrap:wrap;">
+            <span class="tag-mini">내 Not-to-do 12개</span>
+            <span class="tag-mini">다른 사용자 Top 금지 수칙 보기</span>
+          </div>
+        </section>
+      </section>
+    </div>
+
+    <footer class="footer">
+      <span>실패를 숨기지 않는 사람에게, 내일의 구조가 생깁니다.</span>
+      <span>오늘 한 번은, 실패를 데이터로 남기고 끝내기</span>
+    </footer>
+  </div>
+</body>
+</html>
