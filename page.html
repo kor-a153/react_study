@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>faillog – 실패를 재조정하는 기록</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #020617;
+      color: #e5e7eb;
+    }
+    .app {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px 16px 40px;
+    }
+    h1 {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      color: #9ca3af;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 20px;
+    }
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+    .card {
+      background: radial-gradient(circle at top left, rgba(148,163,184,0.2), transparent),
+                  #020617;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 18px 40px rgba(15,23,42,0.8);
+    }
+    .card h2 {
+      font-size: 18px;
+      margin: 0 0 8px;
+    }
+    .card p.desc {
+      margin: 0 0 16px;
+      font-size: 13px;
+      color: #9ca3af;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 4px;
+      color: #cbd5f5;
+    }
+    input[type="text"],
+    input[type="date"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid #4b5563;
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 13px;
+      outline: none;
+      transition: border 0.15s, box-shadow 0.15s, background 0.15s;
+    }
+    input[type="text"]:focus,
+    input[type="date"]:focus,
+    textarea:focus,
+    select:focus {
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 1px #0ea5e9;
+      background: #02081b;
+    }
+    textarea {
+      min-height: 70px;
+      resize: vertical;
+    }
+    .field {
+      margin-bottom: 14px;
+    }
+    .field-inline {
+      display: flex;
+      gap: 10px;
+    }
+    .field-inline .field {
+      flex: 1;
+      margin-bottom: 0;
+    }
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+    .tag {
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.6);
+      color: #9ca3af;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 9px 18px;
+      border-radius: 999px;
+      border: none;
+      background: linear-gradient(135deg, #0ea5e9, #22c55e);
+      color: #0b1120;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      margin-top: 8px;
+      box-shadow: 0 8px 24px rgba(34,197,94,0.4);
+      transition: transform 0.1s, box-shadow 0.1s, opacity 0.15s;
+    }
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 30px rgba(34,197,94,0.5);
+      opacity: 0.96;
+    }
+    .btn:active {
+      transform: translateY(0);
+      box-shadow: 0 4px 16px rgba(34,197,94,0.4);
+    }
+    .summary-section {
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px dashed rgba(55,65,81,0.7);
+    }
+    .summary-section:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    .summary-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #e5e7eb;
+      margin-bottom: 4px;
+    }
+    .summary-body {
+      font-size: 13px;
+      color: #9ca3af;
+      white-space: pre-line;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      background: rgba(15,23,42,0.8);
+      border-radius: 999px;
+      padding: 4px 10px;
+      border: 1px solid rgba(148,163,184,0.5);
+      color: #9ca3af;
+      margin-bottom: 10px;
+    }
+    .pill span.icon {
+      font-size: 13px;
+    }
+    small.helper {
+      display: block;
+      margin-top: 3px;
+      font-size: 11px;
+      color: #6b7280;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h1>faillog – 실패를 재조정하는 기록</h1>
+    <div class="subtitle">
+      실패를 반성문이 아니라, <b>다음 시도를 위한 설계도</b>로 바꾸는 연습.
+    </div>
+
+    <div class="layout">
+      <!-- 좌측: 입력 폼 -->
+      <div class="card">
+        <h2>1. 실패 기록 & 재조정 입력</h2>
+        <p class="desc">
+          무엇이 어떻게 틀어졌는지 적고, 아래의 다섯 가지 축으로 <b>목표를 다시 설계</b>해 봅니다.
+        </p>
+
+        <form id="failForm">
+          <!-- 기본 정보 -->
+          <div class="field-inline">
+            <div class="field">
+              <label for="failureTitle">실패 제목</label>
+              <input id="failureTitle" type="text" placeholder="예: 2주 연속 새벽기상 실패" />
+            </div>
+            <div class="field">
+              <label for="failureDate">실패 시점</label>
+              <input id="failureDate" type="date" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="failureGoal">원래 목표</label>
+            <input id="failureGoal" type="text" placeholder="예: 30일 동안 매일 5시 기상" />
+          </div>
+
+          <div class="field">
+            <label for="failureWhat">무슨 일이 있었나요?</label>
+            <textarea id="failureWhat" placeholder="사실만 간단히 적어보세요. 감정보다 상황 위주로 적는 것이 좋습니다."></textarea>
+          </div>
+
+          <hr style="border: none; border-top: 1px dashed #4b5563; margin: 14px 0;" />
+
+          <!-- 재조정 5축 안내 태그 -->
+          <div class="tag-row">
+            <span class="tag">분량 재조정</span>
+            <span class="tag">환경 변경</span>
+            <span class="tag">리듬·빈도 조정</span>
+            <span class="tag">전략 전환</span>
+            <span class="tag">한 가지 조정</span>
+          </div>
+
+          <!-- 1) 분량 재조정 -->
+          <div class="field">
+            <label for="scaleDown">1) 분량을 어떻게 줄일 건가요?</label>
+            <textarea id="scaleDown" placeholder="예: 매일 1시간 운동 → 일단 10분 걷기로 시작한다."></textarea>
+            <small class="helper">목표를 현재 가능 수준의 50~70%까지 낮춰보세요.</small>
+          </div>
+
+          <!-- 2) 환경 재설계 -->
+          <div class="field">
+            <label for="environmentChange">2) 환경을 어떻게 바꿀 수 있을까요?</label>
+            <textarea id="environmentChange" placeholder="예: 알람 시계를 침대에서 손 뻗으면 안 닿는 곳으로 옮긴다."></textarea>
+            <small class="helper">장소·도구·주변 사람·방해 요소 중 하나만 바꿔도 좋습니다.</small>
+          </div>
+
+          <!-- 3) 리듬 / 빈도 조정 -->
+          <div class="field-inline">
+            <div class="field">
+              <label for="frequency">3) 리듬/빈도는 어떻게 바꿀까요?</label>
+              <select id="frequency">
+                <option value="">선택하세요</option>
+                <option value="매일 → 주 5회">매일 → 주 5회</option>
+                <option value="매일 → 주 3회">매일 → 주 3회</option>
+                <option value="매일 → 주 2회">매일 → 주 2회</option>
+                <option value="시간대 변경">시간대 변경</option>
+                <option value="휴식일 추가">휴식일 추가</option>
+                <option value="직접 작성">직접 작성</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="frequencyNote">리듬에 대한 메모</label>
+              <input id="frequencyNote" type="text" placeholder="예: 아침 대신 퇴근 후로 옮긴다." />
+            </div>
+          </div>
+
+          <!-- 4) 전략 전환 -->
+          <div class="field">
+            <label for="strategyShift">4) 어떤 전략을 바꾸나요?</label>
+            <textarea id="strategyShift" placeholder="예: 혼자 하던 공부를 스터디로 전환, 헬스장에서만 운동 → 집에서 맨몸운동으로 시작."></textarea>
+          </div>
+
+          <!-- 5) 한 가지 조정 -->
+          <div class="field">
+            <label for="oneSmallFix">5) 이번에 ‘단 한 가지’만 바꾼다면?</label>
+            <textarea id="oneSmallFix" placeholder="예: 시간대를 바꾸는 것 하나만 먼저 바꾼다."></textarea>
+            <small class="helper">모든 걸 다 고치려 하지 말고, 딱 한 가지만 골라보세요.</small>
+          </div>
+
+          <button type="submit" class="btn">
+            실패를 재설계하기
+            <span>↻</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- 우측: 요약 / 피드백 -->
+      <div class="card" id="summaryCard">
+        <h2>2. 실패 → 재설계 요약</h2>
+        <p class="desc">
+          왼쪽에서 입력한 내용을 바탕으로, 실패가 <b>다음 시도를 위한 설계도</b>로 정리됩니다.
+        </p>
+
+        <div class="pill">
+          <span class="icon">🧭</span>
+          <span>아직은 반성문이 아니라, 실험 기록입니다.</span>
+        </div>
+
+        <div id="summaryContent">
+          <div class="summary-section">
+            <div class="summary-title">실패 기본 정보</div>
+            <div class="summary-body">
+아직 기록된 실패가 없습니다.
+왼쪽에서 한 번 입력해 보세요.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const form = document.getElementById("failForm");
+      const summaryContent = document.getElementById("summaryContent");
+      const summaryCard = document.getElementById("summaryCard");
+
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const title = document.getElementById("failureTitle").value.trim();
+        const date = document.getElementById("failureDate").value;
+        const goal = document.getElementById("failureGoal").value.trim();
+        const what = document.getElementById("failureWhat").value.trim();
+
+        const scaleDown = document.getElementById("scaleDown").value.trim();
+        const environment = document.getElementById("environmentChange").value.trim();
+        const frequency = document.getElementById("frequency").value;
+        const frequencyNote = document.getElementById("frequencyNote").value.trim();
+        const strategy = document.getElementById("strategyShift").value.trim();
+        const oneFix = document.getElementById("oneSmallFix").value.trim();
+
+        const displayTitle = title || "제목 없는 실패";
+        const displayDate = date || "날짜 미기록";
+        const displayGoal = goal || "목표 미기록";
+        const displayWhat = what || "상황 설명이 아직 비어 있습니다.";
+
+        const displayScaleDown = scaleDown || "아직 분량 재조정 계획이 적혀 있지 않습니다.";
+        const displayEnv = environment || "환경을 어떻게 바꿀지 아직 정리되지 않았습니다.";
+        const displayFreq =
+          (frequency ? `선택: ${frequency}` : "선택 없음") +
+          (frequencyNote ? `\n메모: ${frequencyNote}` : "");
+        const displayStrategy = strategy || "전략 전환 내용이 아직 비어 있습니다.";
+        const displayOneFix = oneFix || "이번 시도에서 딱 한 가지 바꿀 것을 골라보세요.";
+
+        summaryContent.innerHTML = `
+          <div class="summary-section">
+            <div class="summary-title">① 실패 기본 정보</div>
+            <div class="summary-body">
+제목: ${displayTitle}
+날짜: ${displayDate}
+원래 목표: ${displayGoal}
+
+무슨 일이 있었나?
+${displayWhat}
+            </div>
+          </div>
+
+          <div class="summary-section">
+            <div class="summary-title">② 분량 재조정 (Scale Down)</div>
+            <div class="summary-body">
+${displayScaleDown}
+            </div>
+          </div>
+
+          <div class="summary-section">
+            <div class="summary-title">③ 환경 재설계 (Environment)</div>
+            <div class="summary-body">
+${displayEnv}
+            </div>
+          </div>
+
+          <div class="summary-section">
+            <div class="summary-title">④ 리듬 · 빈도 조정 (Rhythm)</div>
+            <div class="summary-body">
+${displayFreq}
+            </div>
+          </div>
+
+          <div class="summary-section">
+            <div class="summary-title">⑤ 전략 전환 (Strategy)</div>
+            <div class="summary-body">
+${displayStrategy}
+            </div>
+          </div>
+
+          <div class="summary-section">
+            <div class="summary-title">⑥ 이번에 딱 한 가지 바꿀 것 (One Small Fix)</div>
+            <div class="summary-body">
+${displayOneFix}
+            </div>
+          </div>
+        `;
+
+        // 요약 카드로 부드럽게 스크롤
+        summaryCard.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
+  </script>
+</body>
+</html>
